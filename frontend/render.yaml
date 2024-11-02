@@ -1,0 +1,4 @@
+static:
+  - path: /
+    destination: index.html
+    status: 200
