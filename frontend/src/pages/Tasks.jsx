@@ -7,9 +7,11 @@ import BoardView from '../components/Task/Boardview';
 import { deleteTask, fetchTasks } from '../api/task';
 import DeleteTask from '../components/Task/DeleteTask';
 import SelectList from '../components/SelectList';
-import { TASK_TYPE_LIST } from '../utils';
 import { handleError } from '../utils/errorHandler';
 import Loading from '../components/Loading';
+import Tabs from '../components/Tabs';
+
+const TABS = [{ title: 'All' }, { title: 'Pending' }, { title: 'Completed' }];
 
 const Tasks = () => {
   const [open, setOpen] = useState(false);
@@ -18,15 +20,17 @@ const Tasks = () => {
   const [editTask, setEditTask] = useState(null);
   const [deleteTaskModalOpen, setDeleteTaskModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [selectedTaskType, setSelectedTaskType] = useState('all');
   const [selectedDueDateSortOrder, setSelectedDueDateSortOrder] =
     useState('ascending');
+  const [selected, setSelected] = useState(0);
 
   const getTasks = async () => {
     try {
       setLoading(true);
+      let completionStatus =
+        selected === 1 ? 'pending' : selected === 2 ? 'completed' : null;
       const response = await fetchTasks({
-        completionStatus: selectedTaskType,
+        completionStatus,
         dueDateOrder: selectedDueDateSortOrder,
       });
       if (response.status) {
@@ -42,7 +46,7 @@ const Tasks = () => {
   };
   useEffect(() => {
     getTasks();
-  }, [selectedDueDateSortOrder, selectedTaskType]);
+  }, [selectedDueDateSortOrder, selected]);
   const onEdit = (task) => {
     setEditTask(task);
     setOpen(true);
@@ -80,22 +84,7 @@ const Tasks = () => {
     <div className="w-full p-10">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
         <Title title="Tasks" />
-        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-          <SelectList
-            lists={['all', ...TASK_TYPE_LIST]}
-            selected={selectedTaskType}
-            setSelected={setSelectedTaskType}
-            label="Filter by Status"
-            className="w-full md:w-48"
-          />
-          <SelectList
-            lists={['ascending', 'descending']}
-            selected={selectedDueDateSortOrder}
-            setSelected={setSelectedDueDateSortOrder}
-            label="Order by due date"
-            className="w-full md:w-48"
-          />
-        </div>
+
         <Button
           onClick={() => setOpen(true)}
           label="Create Task"
@@ -104,11 +93,29 @@ const Tasks = () => {
         />
       </div>
 
-      <div className="w-full">
-        <BoardView tasks={tasks} onEdit={onEdit} onDelete={onDelete} />
-      </div>
+      <Tabs tabs={TABS} selected={selected} setSelected={setSelected}>
+        {selected !== 2 && (
+          <div className="flex justify-end mb-1">
+            <SelectList
+              lists={['ascending', 'descending']}
+              selected={selectedDueDateSortOrder}
+              setSelected={setSelectedDueDateSortOrder}
+              label="Order by due date"
+              className="w-full md:w-48"
+            />
+          </div>
+        )}
+        <div className="w-full">
+          <BoardView tasks={tasks} onEdit={onEdit} onDelete={onDelete} />
+        </div>
+      </Tabs>
 
-      <AddTask open={open} setOpen={setOpen} task={editTask} />
+      <AddTask
+        getTasks={getTasks}
+        open={open}
+        setOpen={setOpen}
+        task={editTask}
+      />
       <DeleteTask
         open={deleteTaskModalOpen}
         setOpen={setDeleteTaskModalOpen}

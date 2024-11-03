@@ -6,11 +6,11 @@ import { MdEdit, MdDelete } from 'react-icons/md';
 const TaskCard = ({ task, onEdit, onDelete }) => {
   return (
     <>
-      <div className="w-full h-fit bg-white shadow-md p-4 rounded">
-        <>
+      <div className="w-full h-fit bg-white shadow-md p-4 rounded-lg sm:rounded-xl transition-transform duration-200 ease-in-out hover:scale-105">
+        <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className=" w-full flex  justify-between gap-2">
-              <div className="flex gap-1 items-center">
+              <div className="flex gap-2 items-center">
                 <div
                   className={clsx(
                     'w-4 h-4 rounded-full',
@@ -32,19 +32,21 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
               </div>
             </div>
           </div>
-          <span className="text-sm text-gray-600">
-            {formatDate(new Date(task?.dueDate))}
+          <span className="text-md text-gray-600">
+            Status: {task?.completionStatus}
           </span>
-        </>
+
+          {task.completionStatus === 'pending' && (
+            <span className="text-sm text-gray-600">
+              Due on: {formatDate(new Date(task?.dueDate))}
+            </span>
+          )}
+        </div>
 
         <div className="w-full border-t border-gray-200 my-2" />
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1 items-center text-sm text-gray-600">
-              {/* <BiMessageAltDetail /> */}
-              <span>{task?.activities?.length}</span>
-            </div>
-          </div>
+
+        <div className="flex items-center  gap-3 mb-2">
+          <span className="text-sm  text-gray-600">{task?.description}</span>
         </div>
       </div>
     </>

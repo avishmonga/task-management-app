@@ -7,8 +7,10 @@ import Button from '../Button';
 import { createTask, updateTask } from '../../api/task';
 import { TASK_TYPE_LIST } from '../../utils';
 import { handleError } from '../../utils/errorHandler';
+import Textarea from '../Textarea';
+import { IoMdClose } from 'react-icons/io';
 
-const AddTask = ({ open, setOpen, task }) => {
+const AddTask = ({ open, setOpen, task, getTasks }) => {
   const [completionStatus, setCompletionStatus] = useState();
   const submitHandler = async (data) => {
     try {
@@ -18,6 +20,7 @@ const AddTask = ({ open, setOpen, task }) => {
 
       if (response.status) {
         setOpen(false);
+        getTasks();
       } else {
         throw new Error('Failed to save task');
       }
@@ -54,12 +57,18 @@ const AddTask = ({ open, setOpen, task }) => {
     >
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
-          <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
+          <DialogPanel className="w-full max-w-md space-y-4 border bg-white p-12">
             <DialogTitle
               as="h2"
-              className="text-base font-bold leading-6 text-gray-900 mb-4"
+              className="text-base flex justify-between font-bold leading-6 text-gray-900 mb-4"
             >
               {task ? 'UPDATE TASK' : 'ADD TASK'}
+              <span
+                className="text-lg cursor-pointer text-red-800"
+                onClick={() => setOpen(false)}
+              >
+                <IoMdClose />
+              </span>
             </DialogTitle>
             <form onSubmit={handleSubmit(submitHandler)}>
               <div className="mt-2 flex flex-col gap-6">
@@ -82,16 +91,27 @@ const AddTask = ({ open, setOpen, task }) => {
                   setSelected={setCompletionStatus}
                 />
 
-                <Textbox
-                  placeholder="Due date"
-                  type="date"
-                  name="dueDate"
-                  label="Task Due Date"
+                {completionStatus === 'pending' && (
+                  <Textbox
+                    placeholder="Due date"
+                    type="date"
+                    name="dueDate"
+                    label="Task Due Date"
+                    className="w-full rounded"
+                    register={register('dueDate', {
+                      required: 'Due date is required!',
+                    })}
+                    error={errors.dueDate ? errors.dueDate.message : ''}
+                  />
+                )}
+                <Textarea
+                  name="description"
+                  placeholder="Description"
+                  label="Description (optional)"
+                  register={register('description')}
                   className="w-full rounded"
-                  register={register('dueDate', {
-                    required: 'Due date is required!',
-                  })}
-                  error={errors.dueDate ? errors.dueDate.message : ''}
+                  error={errors.description ? errors.description.message : ''}
+                  rows={4}
                 />
                 <Button
                   type="submit"

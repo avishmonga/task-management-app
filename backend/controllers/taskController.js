@@ -9,7 +9,10 @@ exports.getTasks = async (req, res) => {
       filter.completionStatus = completionStatus;
     }
     let tasks = Task.find(filter);
-    tasks = tasks.sort({ dueDate: dueDateOrder === 'ascending' ? 1 : -1 });
+    tasks = tasks.sort({
+      completionStatus: -1,
+      dueDate: dueDateOrder === 'ascending' ? 1 : -1,
+    });
     tasks = await tasks.exec();
     return res.status(200).send({ tasks, status: true });
   } catch (err) {
